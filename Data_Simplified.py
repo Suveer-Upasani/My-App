@@ -5,14 +5,16 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['SESSION_FILE_DIR'] = '/Users/suveer/Desktop/New/My_App'
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
+app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
+app.config['SESSION_FILE_DIR'] = os.getenv('SESSION_FILE_DIR', '/path/to/default')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)
 
-# Ensure directories exist
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 if not os.path.exists('static'):
@@ -37,7 +39,7 @@ def upload():
             try:
                 df = pd.read_csv(file_path) 
                 session['csv_data'] = df.to_dict(orient='records')
-                return redirect(url_for('process_data'))  # Redirect to process_data
+                return redirect(url_for('process_data'))
 
             except Exception as e:
                 return f"Error processing CSV file: {str(e)}", 500
@@ -51,27 +53,24 @@ def process_data():
 
     df = pd.DataFrame.from_dict(csv_data)
     try:
-        # Generate bar plot
         plt.figure(figsize=(10, 10))
         df.plot(kind='bar', x=df.columns[0], y=df.columns[1:])
         plt.title('CSV in BAR format')
         plt.xlabel(df.columns[0])
         plt.ylabel(df.columns[1])
-        bar_plot_path = 'static/bar_plot.png'  # Define the path for bar plot
+        bar_plot_path = 'static/bar_plot.png'
         plt.savefig(bar_plot_path)
         plt.close()
 
-        # Generate histogram
         plt.figure(figsize=(10, 10))
         df.hist(bins=10)
         plt.title('CSV histogram')
         plt.xlabel(df.columns[0])
         plt.ylabel('Frequency')
-        histogram_plot_path = 'static/histogram.png'  # Define the path for histogram
+        histogram_plot_path = 'static/histogram.png'
         plt.savefig(histogram_plot_path)
         plt.close()
 
-        # Store plot paths in session
         session['bar_plot'] = bar_plot_path
         session['histogram'] = histogram_plot_path
 
@@ -88,7 +87,6 @@ def display():
     df = pd.DataFrame.from_dict(csv_data)
     rows = df.head().to_html()
 
-    # Retrieve plot paths from session
     bar_plot = session.get('bar_plot')
     histogram = session.get('histogram')
 
