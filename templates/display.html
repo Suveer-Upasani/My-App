@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploaded CSV Content</title>
+</head>
+<body>
+    <h1>Uploaded CSV Content</h1>
+    <div>
+        {{ rows|safe }}
+    </div>
+    <h2>Data Visualization - Bar Chart</h2>
+    <img src="{{ bar_plot }}" alt="CSV Data Bar Chart">
+    <h2>Data Visualization - Histogram</h2>
+    <img src="{{ histogram }}" alt="CSV Data Histogram">
+    <a href="{{ url_for('upload') }}">Upload another file</a>
+</body>
+</html>
