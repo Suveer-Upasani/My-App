@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Planet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light background color */
+        }
+
+        .container {
+            max-width: 600px; /* Center the form */
+            margin-top: 50px; /* Add space from the top */
+            padding: 20px; /* Add padding */
+            border-radius: 8px; /* Rounded corners */
+            background-color: #ffffff; /* White background for the form */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        h2 {
+            text-align: center; /* Center the heading */
+            color: #343a40; /* Dark text color */
+        }
+
+        .spinner-border {
+            display: inline-block; /* Align loading spinner inline */
+            margin-left: 10px; /* Add space to the left */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Add a New Planet</h2>
+        <form id="planetForm" onsubmit="submitPlanetForm(event)">
+            <div class="mb-3">
+                <label for="planet_name" class="form-label">Planet Name</label>
+                <input type="text" class="form-control" id="planet_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="planet_type" class="form-label">Planet Type</label>
+                <input type="text" class="form-control" id="planet_type" required>
+            </div>
+            <div class="mb-3">
+                <label for="home_star" class="form-label">Home Star</label>
+                <input type="text" class="form-control" id="home_star" required>
+            </div>
+            <div class="mb-3">
+                <label for="mass" class="form-label">Mass (in kg)</label>
+                <input type="number" step="0.01" class="form-control" id="mass" required>
+            </div>
+            <div class="mb-3">
+                <label for="radius" class="form-label">Radius (in km)</label>
+                <input type="number" step="0.01" class="form-control" id="radius" required>
+            </div>
+            <div class="mb-3">
+                <label for="distance" class="form-label">Distance from Home Star (in AU)</label>
+                <input type="number" step="0.01" class="form-control" id="distance" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Planet</button>
+            <div id="loading" class="spinner-border text-primary d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </form>
+        <div id="message" class="mt-3"></div>
+    </div>
+
+    <script>
+        async function submitPlanetForm(event) {
+            event.preventDefault(); // Prevent default form submission
+            document.getElementById('loading').classList.remove('d-none'); // Show loading spinner
+
+            const planetData = {
+                planet_name: document.getElementById('planet_name').value,
+                planet_type: document.getElementById('planet_type').value,
+                home_star: document.getElementById('home_star').value,
+                mass: parseFloat(document.getElementById('mass').value),
+                radius: parseFloat(document.getElementById('radius').value),
+                distance: parseFloat(document.getElementById('distance').value)
+            };
+
+            const token = localStorage.getItem('token'); // Get JWT token from local storage
+
+            try {
+                const response = await fetch('/add_planet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(planetData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    // Handle token expiration or invalid token
+                    if (response.status === 401) {
+                        localStorage.removeItem('token'); // Clear token on unauthorized access
+                        window.location.href = '/login'; // Redirect to login page
+                    }
+                    throw new Error(`Error: ${response.status} ${errorData.message}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('message').innerHTML = `<div class="alert alert-success">Planet added with ID: ${data.planet_id}</div>`;
+                
+                // Clear form fields after successful submission
+                document.getElementById('planetForm').reset();
+            } catch (error) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            } finally {
+                document.getElementById('loading').classList.add('d-none'); // Hide loading spinner
+            }
+        }
+    </script>
+</body>
+</html>
