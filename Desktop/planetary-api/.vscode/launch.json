@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+
+
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload"
+            ],
+            "jinja": true
+        },
+        {
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "name": "Launch Extension",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "preLaunchTask": "npm",
+            "request": "launch",
+            "type": "extensionHost"
+        },
+        {
+            "name": "Python: Flask",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "app.py", // Your Flask app file
+                "FLASK_ENV": "development" // Enables debug mode
+            },
+            "args": [
+                "run"
+            ],
+            "jinja": true,
+            "justMyCode": true
+        }
+    ]
+}
